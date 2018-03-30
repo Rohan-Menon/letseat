@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Let's Eat!</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <!-- Load reset.css & style.css -->
+    <link rel="stylesheet" type="text/css" href="./assets/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
+
+    <!-- Load hover.css -->
+    <link rel="stylesheet" type="text/css" href="./assets/css/hover.css">
+
+    <!-- firebase config -->
+
+    <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase.js"></script>
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyDQvxT4o1IGoIDsnXpBko6SnrPEI9NA1DU",
+            authDomain: "lets-eat-be2d8.firebaseapp.com",
+            databaseURL: "https://lets-eat-be2d8.firebaseio.com",
+            projectId: "lets-eat-be2d8",
+            storageBucket: "lets-eat-be2d8.appspot.com",
+            messagingSenderId: "844468448918"
+        };
+        firebase.initializeApp(config);
+    </script>
+
+    <!-- email.js -->
+    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function () {
+            emailjs.init("user_an8Ow6SvDsNOLo2nnrJms");
+        })();
+    </script>
+
+    <!-- Load Google Font-->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <script data-main="./assets/javascript/script" src="./assets/javascript/lib/require.js"></script>
+
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/solid.js" integrity="sha384-+Ga2s7YBbhOD6nie0DzrZpJes+b2K1xkpKxTFFcx59QmVPaSA8c7pycsNaFwUK6l"
+        crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/fontawesome.js" integrity="sha384-7ox8Q2yzO/uWircfojVuCQOZl+ZZBg2D2J5nkpLqzH1HY0C1dHlTKIbpRz/LG23c"
+        crossorigin="anonymous"></script>
+
+
+</head>
+
+<body>
+
+
+    <!-- This is the HTML for Land Display -->
+    <header>
+        <div id="landing-background"></div>
+        <div id="landing-container" class="container d-flex align-items-center">
+            <div class="main-wrapper">
+                <div id="landing-content">
+                    <div id="landing-header">Hungry?</div>
+                    <div id="search-container" class="container">
+                        <form id="form-content" data-bind="submit: submitSearch">
+                            <div class="row">
+                                <div class="col-sm-6 col-12 landing-label">
+                                    <label for="zipCode">What is your Zip Code?</label>
+                                    <input type="text" class="form-control" id="zipCode" data-bind="value: zipCode" />
+                                    <!-- HI IF YOU'RE MERGING AND LOOKING FOR THE VALIDATION LABEL I HAVE MOVED THEM PLS DONT RE-ADD THEM OK -->
+                                </div>
+                                <div class="col-sm-6 col-12 landing-label">
+                                    <label for="searchTerm">What are you craving?</label>
+                                    <input type="text" class="form-control" id="searchTerm" data-bind="value: searchTerm">
+                                    <!-- HI IF YOU'RE MERGING AND LOOKING FOR THE VALIDATION LABEL I HAVE MOVED THEM PLS DONT RE-ADD THEM OK -->
+                                </div>
+
+
+                            </div>
+                            <div class="row">
+                                <label class="col-lg-6 col-12 zip-sub" data-bind="text: zipInfo"></label>
+                                <label class="col-lg-6 col-12 search-sub" style="white-space: nowrap">How about some&nbsp;
+                                    <label id="suggestions-1" class="suggestion">pizza?</label>
+                                    <label id="suggestions-2" class="suggestion">rib-eye steak?</label>
+                                    <label id="suggestions-3" class="suggestion">ice cream?</label>
+                                    <label id="suggestions-4" class="suggestion">fried chicken?</label>
+                                    <label id="suggestions-5" class="suggestion">texas bbq?</label>
+                                </label>
+                            </div>
+                            <button id="submitSearch" type="submit" class="btn btn-warning hvr-fade">Let's Eat!
+                                <i class="fas fa-utensils fa-lg"></i>
+                            </button>
+                            <div id="landingErrMsg"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- This is the HTML for the search again button -->
+    <div class="container d-flex justify-content-center">
+        <div class="row d-flex justify-content-center">
+            <button id="back-to-search" class="hvr-bob" data-bind="click: navToSearch">
+                <p>
+                    <i class="fas fa-caret-up fa-2x"></i>
+                </p>I want something else</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <button id="change-info" data-bind="click: clearLocalStorage">
+                <p>
+                    Change User Info
+                </p>
+            </button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="row">
+            <button id="reload-results" data-bind="click:submitSearch, visible: resultsVisible">
+                <p>
+                    Reload Results
+                </p>
+            </button>
+        </div>
+    </div>
+
+    <section id="main-container" class="container d-flex align-items-center">
+        <div class="main-wrapper">
+            <div id="main-header">Let's Eat!</div>
+            <div id="main-content" style="display: none;">
+                <!-- This is the HTML for Result Display -->
+                <div id="result-display" data-bind="visible: resultsVisible" style="display: none;">
+
+                    <div class="display-header col-12">
+                        <p class="text-center">Any of these activities interest you?</p>
+                    </div>
+                    <div id="result-container" class="pre-scrollable">
+                        <div class="row" data-bind="foreach: currentEvents">
+
+                            <!-- Html for Result Cards -->
+                            <div class="col-sm-12 col-md-6 col-lg-4 column">
+                                <div class="card hvr-glow">
+                                    <p class="card-header" data-bind="text: name"></p>
+                                    <img class="card-img-top" data-bind="attr:{'src': image_url}">
+                                    <div class="container">
+                                        <div class="row cir-group text-center">
+                                            <div class="col-4">
+                                                <button class="cir hvr-none text-center">
+                                                    <p data-bind="text: price"></p>
+                                                    <i class="fas fa-money-bill-alt fa-sm"></i>
+                                                </button>
+                                            </div>
+                                            <div class="col-4" data-toggle="modal" data-target="#createModal" data-bind="click: $root.saveEventInfo">
+                                                <button class="cir cir-mid hvr-fade text-center">
+                                                    <p>Info</p>
+                                                    <i class="fas fa-question fa-sm"></i>
+                                                </button>
+                                            </div>
+                                            <div class="col-4">
+                                                <button class="cir hvr-none text-center">
+                                                    <p data-bind="text: rating"></p>
+                                                    <i class="fas fa-star fa-sm"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="address text-center" data-bind="text: location.address1"></div>
+                                    <div class="address text-center" data-bind="text: location.city + ', ' + location.zip_code"></div>
+                                    <div class="join-max-seats-display text-center" data-bind="text: 'Available Seats: '+users.length+'/'+$data.maxSeats"></div>
+                                    <button class="btn btn-warning-reverse hvr-fade col-12" data-bind="click: $root.joinEvent">Join</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div id="result-footer">
+                        <div class="col-12"></div>
+                        <button id="result-footer-text" class="col-12 btn btn-warning hvr-fade" data-bind="click: navToCreate"> None of these interest me... Create an Event</button>
+                    </div>
+
+                </div>
+
+                <!-- This is the HTML for the Modal that pops up when you click INFO in results-display -->
+                <div id="createModal" class="modal fade" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <div class="modal-title" data-bind="text: $root.eventChosen().name"></div>
+                            </div>
+                            <div class="modal-body">
+                                <!-- THIS IS WHERE THE HTML GOES FOR WHAT YOU WANT TO GO IN THE MODAL! -->
+                                <div data-bind="with: eventChosen">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <img class="modal-img" data-bind="attr:{'src': $root.eventChosen().image_url}">
+                                        </div>
+
+                                        <div class="modal-info col-6">
+                                            <div class="modal-section">
+                                                <h2>Address:</h2>
+                                                <div data-bind="text: $root.eventChosen().location.address1"></div>
+                                                <div data-bind="text: $root.eventChosen().location.city + ', ' + $root.eventChosen().location.zip_code"></div>
+                                                <div data-bind="text: $root.eventChosen().phoneNumber"></div>
+                                            </div>
+
+                                            <div class='modal-section'>
+                                                <h2>Info:</h2>
+                                                <div data-bind="foreach: $root.eventChosen().categories">
+                                                    <span data-bind="text: title, "></span>
+                                                </div>
+                                                <div class='modal-rating' data-bind="click: $root.drawRating()"></div>
+                                                <div class='modal-price' data-bind="click: $root.drawPrice()"></div>
+                                            </div>
+
+                                            <div class='modal-section'>
+                                                <h2 data-bind="text: 'Seats (max: ' + $root.eventChosen().maxSeats + ')'"></h2>
+                                                <div data-bind="foreach: $root.eventChosen().users">
+                                                    <p data-bind="text: ($index() + 1) + '. ' + firstName + ' ' + lastName"></p>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="container">
+                                    <div data-bind="with: $root.eventChat">
+                                        <div class='col-12 chat' id='chatSpace' with="foreach: $root.eventChat">
+
+                                            <div class="chat-display" data-bind="foreach: $data">
+
+                                                <span data-bind="text:user+': '"></span>
+                                                <span data-bind="text:text"></span>
+                                                <br>
+                                            </div>
+                                        </div>
+                                        <div class='row'>
+                                            <div class='col-10 chat'>
+                                                <div>
+                                                    <div>
+                                                        <input type="text" class="form-control" id="chatMessage" data-bind="value:$root.chatMessage" placeholder="Enter chat message">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class='chat-btn col-2'>
+                                                <button type="" id='newChat' class="btn btn-primary" data-bind="click: $root.addNewChat">Send</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <a data-bind="attr: {href: $root.eventChosen().url}" target="_blank">
+                                    <button type="button" class="btn btn-warning hvr-fade">
+                                        Go to Yelp Page
+                                    </button>
+                                </a>
+                                <button type="button" class="btn btn-secondary hvr-fade" data-dismiss="modal" aria-label="close">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- This is the HTML for Create Display -->
+                <div id="create-display" data-bind="visible: createVisible" style="display: none;">
+
+                    <div class="display-header col-12">
+                        <p class="text-center">Create an event?</p>
+                    </div>
+
+                    <div id="create-container" class="pre-scrollable">
+                        <div class="row" data-bind="foreach: createEventList">
+                            <div class="col-sm-12 col-md-6 col-lg-4 column">
+
+
+                                <!-- This is HTML for cards in create-display -->
+                                <div class="card hvr-glow">
+                                    <p class="card-header" data-bind="text: name"></p>
+                                    <img class="card-img-top" data-bind="attr:{'src': image_url}">
+                                    <div class="container">
+                                        <div class="row cir-group text-center">
+                                            <div class="col-4">
+                                                <button class="cir hvr-none text-center">
+                                                    <p data-bind="text: price"></p>
+                                                    <i class="fas fa-money-bill-alt fa-sm"></i>
+                                                </button>
+                                            </div>
+                                            <div class="col-4">
+                                                <a data-bind="attr: {href: url}" target="_blank">
+                                                    <button class="cir cir-mid hvr-fade text-center">
+                                                        <p>Yelp</p>
+                                                        <i class="fas fa-utensils fa-sm"></i>
+                                                    </button>
+                                                </a>
+                                            </div>
+                                            <div class="col-4">
+                                                <button class="cir hvr-none text-center">
+                                                    <p data-bind="text: rating"></p>
+                                                    <i class="fas fa-star fa-sm"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="create-info">
+                                        <div class="text-center" data-bind="text: location.address1"></div>
+                                        <div class="text-center" data-bind="text: location.city + ', ' + location.zip_code"></div>
+                                        <div class="text-center" data-bind="text: phoneNumber"></div>
+                                    </div>
+                                    <div class="create-info">
+                                        <h2 class="text-center">Categories</h2>
+                                        <div class="text-center" data-bind="foreach: categories">
+                                            <span data-bind="text: title, "></span>
+                                        </div>
+                                    </div>
+                                    <div class="card-info">
+                                        <div class="">
+                                            <div class="">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <div class="input-group-text">Seats</div>
+                                                    </div>
+                                                    <input type="number" class="form-control" class="seat-input" value="5" data-bind="attr:{'id':$index()}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-warning-reverse hvr-fade col-12" data-bind="click: $root.createEvent">Create</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="create-footer">
+                        <div class="col-12"></div>
+                        <button id="create-footer-text" class="col-12 btn btn-warning hvr-fade" data-bind="click: navToResult"> Go back to browsing results</button>
+                    </div>
+
+                </div>
+
+                <!-- This is the HTML for User Display -->
+                <div id="user-display" class="container" data-bind="visible: userVisible" style="display: none;">
+                    <div class="display-header col-12">
+                        <p class="text-center">Please enter your info</p>
+                    </div>
+                    <div class="container">
+                        <form id="user-form">
+                            <div class="form-group">
+                                <label for="firstNameInput">First Name</label>
+                                <input type="text" class="form-control" id="firstNameInput" placeholder="John" data-bind="value: firstName">
+                                <label id="firstname-validation" class="join-validation-label">Please Enter a Valid First Name </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastNameInput">Last Name</label>
+                                <input type="text" class="form-control" id="lastNameInput" placeholder="Doe" data-bind="value: lastName">
+                                <label id="lastname-validation" class="join-validation-label">Please Enter a Valid Last Name </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="emailInput">Email</label>
+                                <input type="email" class="form-control" id="emailInput" placeholder="John@Doe.com" data-bind="value: email">
+                                <label id="email-validation" class="join-validation-label">Please Enter a Valid Email </label>
+                            </div>
+                            <button id="submitInfo" type="submit" class="btn hvr-fade btn-primary" data-bind="click: submitUserInfo">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="error-wrapper">
+        <div id="error-container">
+            Error
+        </div>
+    </div>
+</body>
+
+</html>
